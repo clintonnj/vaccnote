@@ -1,0 +1,59 @@
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+    <meta charset="utf 8">
+    <title>Vacc</title>     
+</head>  
+<body ng-app="app">
+<div ng-controller="HelloWorldCtrl">
+ <div ng-repeat="center in centers">
+            <ul><li>{{center.name}}</li></ul>
+			<div ng-repeat="session in center.sessions">
+            <ul><li>{{session.date}}</li><li>{{session.available_capacity}}</li></ul>
+			</div>
+ </div>
+</div>
+<script src="angular.min.js"></script>
+<script>  
+    angular.module("app", []).controller("HelloWorldCtrl", ['$scope', '$http', function($scope, $http) {
+
+	$scope.centers = [];
+	  var getDate = function() {
+		var date = new Date();
+		var month = pad2(date.getMonth() + 1); //months (0-11)
+		var day = pad2(date.getDate()); //day (1-31)
+		var year = date.getFullYear();
+
+		var formattedDate = day + "-" + month + "-" + year;
+		return formattedDate;
+	  };
+
+  var populateData = function(vaccineData) {
+  $scope.centers = vaccineData.centers;
+    console.log(vaccineData.centers);
+	angular.forEach($scope.centers, function(center, key){
+      angular.forEach(center.sessions, function(session, key){
+      if(session.available_capacity > 0)
+         alert('available!');
+   });
+   });
+  };
+  
+  var startCheck = function() {
+  var pincode = '680688';
+  var currentDate = getDate();
+  $http.get(`https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByPin?pincode=${pincode}&date=${currentDate}`)
+    .then(result => populateData(result.data));
+  };  
+
+ setInterval(startCheck, 10000);
+
+  function pad2(n) {
+    return (n < 10 ? '0' : '') + n;
+  }
+
+}]);
+</script> 
+
+</body>  
+</html>
